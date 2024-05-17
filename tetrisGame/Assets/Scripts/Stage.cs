@@ -1,9 +1,10 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public class Stage : MonoBehaviour
 {
     [Header("Editor Objects")]
     public GameObject tilePrefab;
+    public GameObject ghostTilePrefab; // 고스트 타일 프리팹 추가
     public Transform backgroundNode;
     public Transform boardNode;
     public Transform tetrominoNode;
@@ -11,13 +12,14 @@ public class Stage : MonoBehaviour
     public Transform next;
     public Transform hold;
     public GameObject gameoverPanel;
+    
     int changenum = 0;
     int holdnum = 0;
     int holdnum2 = 0;
     int holdnum3 = 0;
     bool dohold = false;
-    int[] numbers = {0, 1, 2, 3, 4, 5, 6}; 
-    int[] nextnumbers = {0, 1, 2, 3};
+    int[] numbers = { 0, 1, 2, 3, 4, 5, 6 };
+    int[] nextnumbers = { 0, 1, 2, 3 };
 
     [Header("Game Settings")]
     [Range(4, 40)]
@@ -25,21 +27,32 @@ public class Stage : MonoBehaviour
     [Range(5, 20)]
     public int boardHeight = 20;
     public float fallCycle = 1.0f;
+    public float firstdelay = 1.0f;
+    public float moveCycle = 0.1f; // 추가: 이동 사이클
+    public float repeatDelay = 0.3f; // 추가: 키를 누르고 있을 때의 초기 지연 시간
 
     private int halfWidth;
     private int halfHeight;
 
     private float nextFallTime;
+    private float nextMoveTime; // 추가: 다음 이동 시간
+    private float nextRepeatTime; // 추가: 다음 반복 시간
+
+    private Transform ghostTetrominoNode; // 추가: 고스트 테트로미노 노드
 
     private void Start()
     {
-      
         gameoverPanel.SetActive(false);
 
         halfWidth = Mathf.RoundToInt(boardWidth * 0.5f);
         halfHeight = Mathf.RoundToInt(boardHeight * 0.5f);
 
         nextFallTime = Time.time + fallCycle;
+        nextMoveTime = 0f; // 초기화: 다음 이동 시간
+        nextRepeatTime = 0f; // 초기화: 다음 반복 시간
+
+        ghostTetrominoNode = new GameObject("GhostTetromino").transform; // 고스트 테트로미노 노드 초기화
+        ghostTetrominoNode.SetParent(transform);
 
         CreateBackground();
 
@@ -57,21 +70,11 @@ public class Stage : MonoBehaviour
             numaddd();
         }
 
-
-;       
         CreateTetromino();
-        
-        
-
-
-
     }
 
     void Update()
     {
-
-
-
         if (gameoverPanel.activeSelf)
         {
             if (Input.GetKeyDown(KeyCode.Escape))
@@ -79,68 +82,75 @@ public class Stage : MonoBehaviour
                 UnityEngine.SceneManagement.SceneManager.LoadScene(0);
             }
         }
-        
-            Vector3 moveDir = Vector3.zero;
-            bool isRotate = false;
 
-             if (Input.GetKeyDown(KeyCode.A))
+        UpdateGhostTetromino(); // 고스트 블록 업데이트
+
+        Vector3 moveDir = Vector3.zero;
+        bool isRotate = false;
+
+        // 이동 입력 처리
+        if (Input.GetKey(KeyCode.LeftArrow) && Time.time >= nextMoveTime)
+        {
+            moveDir.x = -1;
+            nextMoveTime = Time.time + moveCycle;
+            nextRepeatTime = Time.time + repeatDelay; // 초기 지연 시간 설정
+        }
+        else if (Input.GetKey(KeyCode.RightArrow) && Time.time >= nextMoveTime)
+        {
+            moveDir.x = 1;
+            nextMoveTime = Time.time + moveCycle;
+            nextRepeatTime = Time.time + repeatDelay; // 초기 지연 시간 설정
+        }
+
+        // 빠르게 반복하는 이동 처리
+        if (Input.GetKey(KeyCode.LeftArrow) && Time.time >= nextRepeatTime)
+        {
+            moveDir.x = -1;
+            nextRepeatTime = Time.time + moveCycle;
+        }
+        else if (Input.GetKey(KeyCode.RightArrow) && Time.time >= nextRepeatTime)
+        {
+            moveDir.x = 1;
+            nextRepeatTime = Time.time + moveCycle;
+        }
+
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            isRotate = true;
+        }
+        else if (Input.GetKey(KeyCode.DownArrow) && Time.time >= nextMoveTime)
+        {
+            moveDir.y = -1;
+            nextMoveTime = Time.time + moveCycle;
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            while (MoveTetromino(Vector3.down, false))
+            {
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Q))
             {
                 if(dohold == false){
                     minohold();
                 }
                 
             }
-           
-            
-        
-            
 
+        // 아래로 떨어지는 경우는 강제로 이동시킵니다.
+        if (Time.time > nextFallTime)
+        {
+            nextFallTime = Time.time + fallCycle;
+            moveDir = Vector3.down;
+            isRotate = false;
+        }
 
-            if (Input.GetKeyDown(KeyCode.LeftArrow))
-            {
-        // 왼쪽으로 이동
-            
-                moveDir.x = -1;
-            }
-
-            
-
-
-            else if (Input.GetKeyDown(KeyCode.RightArrow))
-            {
-                moveDir.x = 1;
-            }
-
-            if (Input.GetKeyDown(KeyCode.UpArrow))
-            {
-                isRotate = true;
-            }
-            else if (Input.GetKeyDown(KeyCode.DownArrow))
-            {
-                moveDir.y = -1;
-            }
-
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                while (MoveTetromino(Vector3.down, false))
-                {
-                }
-            }
-
-            // 아래로 떨어지는 경우는 강제로 이동시킵니다.
-            if (Time.time > nextFallTime)
-            {
-                nextFallTime = Time.time + fallCycle;
-                moveDir = Vector3.down;
-                isRotate = false;
-            }
-
-            if (moveDir != Vector3.zero || isRotate)
-            {
-                MoveTetromino(moveDir, isRotate);
-            }
-        
-        
+        if (moveDir != Vector3.zero || isRotate)
+        {
+            MoveTetromino(moveDir, isRotate);
+        }
     }
 
     bool MoveTetromino(Vector3 moveDir, bool isRotate)
@@ -272,21 +282,24 @@ public class Stage : MonoBehaviour
         }
 
         return true;
+
     }
 
     // 타일 생성
-    Tile CreateTile(Transform parent, Vector2 position, Color color, int order = 1)
-    {
-        var go = Instantiate(tilePrefab);
-        go.transform.parent = parent;
-        go.transform.localPosition = position;
+    Tile CreateTile(Transform parent, Vector2 position, Color color, int order = 1, bool isGhost = false)
+{
+    GameObject prefab = isGhost ? ghostTilePrefab : tilePrefab;
+    var go = Instantiate(prefab);
+    go.transform.parent = parent;
+    go.transform.localPosition = position;
 
-        var tile = go.GetComponent<Tile>();
-        tile.color = color;
-        tile.sortingOrder = order;
+    var tile = go.GetComponent<Tile>();
+    tile.color = color;
+    tile.sortingOrder = order;
 
-        return tile;
-    }
+    return tile;
+}
+
 
     // 배경 타일을 생성
     void CreateBackground()
@@ -381,6 +394,33 @@ public class Stage : MonoBehaviour
 
         
         }
+    void UpdateGhostTetromino()
+{
+    // 고스트 블록 초기화
+    foreach (Transform child in ghostTetrominoNode)
+    {
+        Destroy(child.gameObject);
+    }
+
+    // 고스트 테트로미노의 위치를 현재 테트로미노의 위치로 설정
+    ghostTetrominoNode.position = tetrominoNode.position;
+    ghostTetrominoNode.rotation = tetrominoNode.rotation;
+
+    // 고스트 테트로미노의 타일 생성
+    foreach (Transform child in tetrominoNode)
+    {
+        Vector3 localPos = child.localPosition;
+        CreateTile(ghostTetrominoNode, localPos, new Color(1, 1, 1, 0.3f), 1, true); // 반투명 흰색
+    }
+
+    // 고스트 테트로미노를 가능한 가장 아래로 이동
+    while (CanMoveTo(ghostTetrominoNode))
+    {
+        ghostTetrominoNode.position += Vector3.down;
+    }
+    ghostTetrominoNode.position -= Vector3.down; // 한 칸 위로 이동하여 정확한 위치로 설정
+}
+    
 
     void minohold() {
         dohold = true;
