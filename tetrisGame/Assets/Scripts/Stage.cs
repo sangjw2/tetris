@@ -13,6 +13,7 @@ public class Stage : MonoBehaviour
     public Transform hold;
     public GameObject gameoverPanel;
     
+    bool isItem = false;
     int changenum = 0;
     int holdnum = 0;
     int holdnum2 = 0;
@@ -192,6 +193,7 @@ public class Stage : MonoBehaviour
     {
         while (root.childCount > 0)
         {
+            
             var node = root.GetChild(0);
 
             int x = Mathf.RoundToInt(node.transform.position.x + halfWidth);
