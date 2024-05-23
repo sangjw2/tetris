@@ -13,7 +13,7 @@ public class Stage : MonoBehaviour
     public Transform hold;
     public GameObject gameoverPanel;
     
-    bool isItem = false;
+
     int changenum = 0;
     int holdnum = 0;
     int holdnum2 = 0;
@@ -41,6 +41,9 @@ public class Stage : MonoBehaviour
 
     private Transform ghostTetrominoNode; // 추가: 고스트 테트로미노 노드
 
+    public bool isItem = false; // 테트로미노에 아이템 속성을 넣을지 여부
+    public bool itemExist = false; // 삭제된 줄에 아이템이 있었는지 여부
+
     private void Start()
     {
         gameoverPanel.SetActive(false);
@@ -54,6 +57,7 @@ public class Stage : MonoBehaviour
 
         ghostTetrominoNode = new GameObject("GhostTetromino").transform; // 고스트 테트로미노 노드 초기화
         ghostTetrominoNode.SetParent(transform);
+
 
         CreateBackground();
 
@@ -200,8 +204,17 @@ public class Stage : MonoBehaviour
             int y = Mathf.RoundToInt(node.transform.position.y + halfHeight - 1);
 
             node.parent = boardNode.Find(y.ToString());
+
+            if(isItem == true) { // tag 속성 변경 -> isItem이 true일 경우
+                node.tag = "Item"; // 해당 블럭의 태그 속성을 Item으로
+ 
+            } else {
+                node.tag = "Untagged"; // isItem = false일 경우 Untagged로 초기화
+            }
             node.name = x.ToString();
+
         }
+        isItem = false;
     }
 
     // 보드에 완성된 행이 있으면 삭제
@@ -214,6 +227,13 @@ public class Stage : MonoBehaviour
         {
             if (column.childCount == boardWidth)
             {
+                foreach (Transform tile in column)
+                {
+                    if(tile.gameObject.tag == "Item") {/* Random.random()으로 아이템 발동*/ 
+                        itemExist = true;
+                    }   
+                }
+                
                 foreach (Transform tile in column)
                 {
                     Destroy(tile.gameObject);
@@ -260,6 +280,8 @@ public class Stage : MonoBehaviour
                 }
             }
         }
+
+        itemExist = false;
     }
 
     // 이동 가능한지 체크
@@ -610,7 +632,9 @@ public class Stage : MonoBehaviour
     // 테트로미노 생성
     void CreateTetromino()
     {   
-        
+        if(Random.Range(0,10) < 4) { // ~=30%로 아이템을 포함한 테트로미노 생성
+            isItem = true;
+        }
        
         
         int maxax = nextnumbers[3];
