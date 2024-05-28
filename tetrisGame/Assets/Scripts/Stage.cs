@@ -205,12 +205,11 @@ public class Stage : MonoBehaviour
 
             node.parent = boardNode.Find(y.ToString());
 
-            if(isItem == true) { // tag 속성 변경 -> isItem이 true일 경우
-                node.tag = "Item"; // 해당 블럭의 태그 속성을 Item으로
- 
-            } else {
-                node.tag = "Untagged"; // isItem = false일 경우 Untagged로 초기화
+            if(isItem == true) {
+                var tile = node.GetComponent<Tile>();
+                tile.color = Color.white; // 아이템 속성을 지닌 블럭의 색상을 흰색으로 변경
             }
+            
             node.name = x.ToString();
 
         }
@@ -227,10 +226,12 @@ public class Stage : MonoBehaviour
         {
             if (column.childCount == boardWidth)
             {
-                foreach (Transform tile in column)
+                foreach (Transform node in column)
                 {
-                    if(tile.gameObject.tag == "Item") {/* Random.random()으로 아이템 발동*/ 
-                        itemExist = true;
+                    var tile = node.GetComponent<Tile>();
+                    if(tile.color==Color.white) {/* Random.random()으로 아이템 발동*/ 
+                        continue;
+                        // stockItem(); // 아이템을 랜덤으로 선택하여 저장 하는 함수
                     }   
                 }
                 
