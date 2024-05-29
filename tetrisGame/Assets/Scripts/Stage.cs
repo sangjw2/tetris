@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
 
 public class Stage : MonoBehaviour
 {
@@ -12,6 +14,7 @@ public class Stage : MonoBehaviour
     public Transform next;
     public Transform hold;
     public GameObject gameoverPanel;
+    public Text scoreText;
     
 
     int changenum = 0;
@@ -42,7 +45,10 @@ public class Stage : MonoBehaviour
     private Transform ghostTetrominoNode; // 추가: 고스트 테트로미노 노드
 
     public bool isItem = false; // 테트로미노에 아이템 속성을 넣을지 여부
-    public bool itemExist = false; // 삭제된 줄에 아이템이 있었는지 여부
+    private bool itemActived = false; // 현재 아이템 작동 중인지 여부
+
+    public int score = 0;
+    public int adder = 1;
 
     private void Start()
     {
@@ -76,6 +82,7 @@ public class Stage : MonoBehaviour
         }
 
         CreateTetromino();
+        UpdateScoreText(0);
     }
 
     void Update()
@@ -158,6 +165,11 @@ public class Stage : MonoBehaviour
         }
     }
 
+    void UpdateScoreText(int sNum)
+    {
+        scoreText.text = "Score: " + sNum.ToString();
+    }
+
     bool MoveTetromino(Vector3 moveDir, bool isRotate)
     {
         Vector3 oldPos = tetrominoNode.transform.position;
@@ -216,9 +228,33 @@ public class Stage : MonoBehaviour
         isItem = false;
     }
 
+    void getItem() {
+        
+        if(Random.Range(0,2)<1) { // item 1
+            // 얻는 점수 두배
+            StartCoroutine(DbScoreSec(30f)); // 30초 동안 점수 두배
+
+        } else { // item 2 
+            // 속도 증가 기능 구현
+            
+        }
+    }
+
+    IEnumerator DbScoreSec(float duration)
+    {
+        itemActived = true;
+        adder = 2;
+
+        yield return new WaitForSeconds(duration);
+
+        adder = 1;
+        itemActived = false;
+    }
+
     // 보드에 완성된 행이 있으면 삭제
     void CheckBoardColumn()
     {
+       
         bool isCleared = false;
 
         // 완성된 행 == 행의 자식 갯수가 가로 크기
@@ -230,8 +266,9 @@ public class Stage : MonoBehaviour
                 {
                     var tile = node.GetComponent<Tile>();
                     if(tile.color==Color.white) {/* Random.random()으로 아이템 발동*/ 
-                        continue;
-                        // stockItem(); // 아이템을 랜덤으로 선택하여 저장 하는 함수
+                        
+                        getItem(); // 아이템을 랜덤으로 선택하여 저장 하는 함수
+                        break; // 흰 타일 한 번 발견한 경우 
                     }   
                 }
                 
@@ -242,6 +279,10 @@ public class Stage : MonoBehaviour
 
                 column.DetachChildren();
                 isCleared = true;
+
+                // 줄 제거 시 점수 추가
+                score+=adder;
+                UpdateScoreText(score);
             }
         }
 
@@ -281,8 +322,6 @@ public class Stage : MonoBehaviour
                 }
             }
         }
-
-        itemExist = false;
     }
 
     // 이동 가능한지 체크
@@ -633,7 +672,7 @@ public class Stage : MonoBehaviour
     // 테트로미노 생성
     void CreateTetromino()
     {   
-        if(Random.Range(0,10) < 4) { // ~=30%로 아이템을 포함한 테트로미노 생성
+        if(Random.Range(0,10) < 1 && itemActived == false) { // 10%로 아이템을 포함한 테트로미노 생성 && itemActived==false
             isItem = true;
         }
        
