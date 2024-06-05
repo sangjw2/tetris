@@ -1,0 +1,23 @@
+<linker>
+	<assembly fullname="Assembly-CSharp" ignoreIfMissing="1">
+		<type fullname="CanvasSwitcher">
+			<method name="StartGame"/>
+		</type>
+		<type fullname="menu">
+			<method name="exitGame"/>
+			<method name="gogameplay"/>
+			<method name="goranking"/>
+		</type>
+		<type fullname="ranking">
+			<method name="gomainmenu"/>
+			<method name="resetscore"/>
+		</type>
+		<type fullname="Stage">
+			<method name="gogame"/>
+			<method name="gomenu"/>
+			<method name="gomenu"/>
+			<method name="restartgame"/>
+			<method name="restartgame"/>
+		</type>
+	</assembly>
+</linker>
