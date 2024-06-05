@@ -1,0 +1,23 @@
+fileFormatVersion: 2
+guid: 6708d56f7704f4716ad4dcd893531405
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - tilePrefab: {fileID: 8898468410266244867, guid: f465b7d8698584fa7a723a810626b908,
+      type: 3}
+  - ghostTilePrefab: {instanceID: 0}
+  - tetrominofactory: {instanceID: 0}
+  - backgroundNode: {instanceID: 0}
+  - boardNode: {instanceID: 0}
+  - tetrominoNode: {instanceID: 0}
+  - tetrominoqueue: {instanceID: 0}
+  - next: {instanceID: 0}
+  - hold: {instanceID: 0}
+  - gameoverPanel: {instanceID: 0}
+  - ghostTetrominoNode: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
