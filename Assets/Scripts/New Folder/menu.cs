@@ -17,6 +17,13 @@ public class menu : MonoBehaviour
    public void goranking(){
        SceneManager.LoadScene("ranking");
       }
+    public void exitGame(){
+    #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+    #else
+        Application.Quit(); // 어플리케이션 종료
+    #endif
+   }
    
 
 

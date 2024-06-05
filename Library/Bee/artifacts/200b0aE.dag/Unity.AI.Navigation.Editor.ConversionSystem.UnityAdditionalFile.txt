@@ -1,1 +1,1 @@
-/Users/heuiminbaek/Desktop/tetrisGame
+/Users/jwsang/Documents/prog/lecture/oss/tetris
